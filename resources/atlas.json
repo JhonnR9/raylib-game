@@ -1,0 +1,20 @@
+{
+    "enemy.png": {
+        "height": 64,
+        "width": 64,
+        "x": 1,
+        "y": 1
+    },
+    "player.png": {
+        "height": 32,
+        "width": 32,
+        "x": 101,
+        "y": 1
+    },
+    "sprite.png": {
+        "height": 32,
+        "width": 32,
+        "x": 67,
+        "y": 1
+    }
+}
