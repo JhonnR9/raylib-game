@@ -5,10 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
 set(RESOURCE_DIR "${CMAKE_SOURCE_DIR}/resources")
+
+add_compile_definitions(BUILD_ATLAS_MODE=0)
 
 include(FetchContent)
 
@@ -33,7 +33,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann)
 
-add_executable(raylib_game src/main.cpp)
+add_executable(raylib_game src/main.cpp
+        src/utils/texture_packer.cpp
+        src/utils/texture_packer.h
+        src/app.cpp
+        src/app.h
+        src/scenes/scene.h
+        src/scenes/my_scene.cpp
+        src/scenes/my_scene.h
+        src/components/color_rect.h
+        src/systems/render_system.cpp
+        src/systems/render_system.h
+        src/systems/system.h)
 
 target_include_directories(raylib_game
         PRIVATE
