@@ -1,57 +1,69 @@
+#include <iostream>
 #include <raylib.h>
 #include <entt/entt.hpp>
 
-struct Position { float x, y; };
-struct Velocity { float vx, vy; };
-struct Renderable { Texture2D texture; };
+#include "rlgl.h"
 
-void RenderSystem(entt::registry& registry) {
-    auto view = registry.view<Position, Renderable>();
-    for (auto entity : view) {
-        auto& pos = view.get<Position>(entity);
-        auto& rend = view.get<Renderable>(entity);
-        DrawTexture(rend.texture, (int)pos.x, (int)pos.y, WHITE);
-    }
-}
+struct Position {
+    Vector2 position;
+};
+
+struct Velocity {
+    Vector2 velocity;
+};
+
+struct RenderColor {
+    Color color;
+};
+
+
+void UpdatePosition(entt::registry& registry, float deltaTime);
+
 
 int main() {
-    InitWindow(800, 600, "Viewport");
+    InitWindow(800, 600, "raylib");
     SetTargetFPS(60);
 
     entt::registry registry;
-    auto entity = registry.create();
 
-    registry.emplace<Position>(entity, 100.0f, 100.0f);
-    registry.emplace<Velocity>(entity, 10.0f, 10.5f);
+    auto entity1 = registry.create();
+    registry.emplace<Position>(entity1,  Vector2{10, 10});
+    registry.emplace<Velocity>(entity1, Vector2{10, 0});
+    registry.emplace<RenderColor>(entity1 ,YELLOW);
 
-    // Carregando textura
-    const Texture2D texture = LoadTexture(RESOURCE_PATH"/texture.jpg");
-    SetTextureFilter(texture, TEXTURE_FILTER_POINT);
-
-    // Adiciona o componente Renderable com a textura
-    registry.emplace<Renderable>(entity, texture);
+    auto entity2 = registry.create();
+    registry.emplace<Position>(entity2, Vector2{10, 10});
+    registry.emplace<Velocity>(entity2, Vector2{0, 10});
+    registry.emplace<RenderColor>(entity2 ,RED);
 
     while (!WindowShouldClose()) {
-        float deltaTime = GetFrameTime();
-
-        // Atualiza posição baseado na velocidade
-        auto& pos = registry.get<Position>(entity);
-        auto& vel = registry.get<Velocity>(entity);
-        pos.x += vel.vx * deltaTime;
-        pos.y += vel.vy * deltaTime;
-
         BeginDrawing();
         ClearBackground(BLACK);
+        UpdatePosition(registry, GetFrameTime());
 
-        // Chama o sistema de renderização
-        RenderSystem(registry);
+        auto view = registry.view<Position, RenderColor>();
+        for (auto entity : view) {
+            Vector2 position = view.get<Position>(entity).position;
+            auto color = view.get<RenderColor>(entity).color;
 
-        DrawText(TextFormat("FPS: %d", GetFPS()), 10, 10, 20, BLUE);
+            DrawRectangle(position.x, position.y, 50, 50, color);
 
+        }
         EndDrawing();
     }
 
-    UnloadTexture(texture);
     CloseWindow();
     return 0;
+}
+
+void UpdatePosition(entt::registry &registry, float deltaTime) {
+    auto view = registry.view<Position, Velocity>();
+    for (auto entity : view) {
+        auto& position = view.get<Position>(entity);
+        auto& velocity = view.get<Velocity>(entity);
+
+        position.position.x += velocity.velocity.x * deltaTime;
+        position.position.y += velocity.velocity.y * deltaTime;
+
+    }
 }
