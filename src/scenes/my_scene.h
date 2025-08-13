@@ -6,8 +6,6 @@
 #define MY_SCENE_H
 #include "scene.h"
 
-
-
 namespace rpg {
     class RenderSystem;
 
@@ -15,7 +13,7 @@ namespace rpg {
     public:
         explicit MyScene(entt::registry* registry);
         void init() override;
-        void loop(float dt) override;
+
     };
 } //rpg
 

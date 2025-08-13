@@ -10,6 +10,18 @@ set(RESOURCE_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 add_compile_definitions(BUILD_ATLAS_MODE=0)
 
+# ====== Opções de Build ======
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the build type: Debug or Release" FORCE)
+endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+# ============================
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -33,7 +45,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann)
 
-add_executable(raylib_game src/main.cpp
+add_executable(raylib_game
+        src/main.cpp
         src/utils/texture_packer.cpp
         src/utils/texture_packer.h
         src/app.cpp
@@ -41,10 +54,14 @@ add_executable(raylib_game src/main.cpp
         src/scenes/scene.h
         src/scenes/my_scene.cpp
         src/scenes/my_scene.h
-        src/components/color_rect.h
+        src/components/components.h
         src/systems/render_system.cpp
         src/systems/render_system.h
-        src/systems/system.h)
+        src/systems/system.h
+        src/systems/player_input_system.h
+        src/systems/player_input_system.cpp
+        src/systems/move_system.cpp
+        src/systems/move_system.h)
 
 target_include_directories(raylib_game
         PRIVATE
@@ -61,3 +78,11 @@ if(UNIX AND NOT APPLE)
     find_package(OpenGL REQUIRED)
     target_link_libraries(raylib_game PRIVATE m pthread dl rt OpenGL::GL)
 endif()
+
+if(MINGW)
+    target_link_options(raylib_game PRIVATE
+            "-static-libgcc"
+            "-static-libstdc++"
+    )
+endif()
+

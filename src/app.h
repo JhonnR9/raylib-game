@@ -15,6 +15,7 @@ namespace rpg {
         std::unique_ptr<Scene> scene;
         std::vector<std::unique_ptr<System>> systems;
         std::unique_ptr<entt::registry> registry;
+
     public:
         APP();
 

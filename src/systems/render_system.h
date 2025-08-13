@@ -8,7 +8,7 @@
 #include "entt/entity/registry.hpp"
 
 namespace rpg {
-#include "entt/entity/registry.hpp"
+
 class RenderSystem final : public System {
 
 public:

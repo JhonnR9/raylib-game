@@ -6,6 +6,8 @@
 #include <iostream>
 #include <raylib.h>
 #include "scenes/my_scene.h"
+#include "systems/move_system.h"
+#include "systems/player_input_system.h"
 #include "systems/render_system.h"
 #if BUILD_ATLAS_MODE
 #include "utils/texture_packer.h"
@@ -27,8 +29,14 @@ namespace rpg {
         registry = std::make_unique<entt::registry>();
         scene = std::make_unique<MyScene>(registry.get());
 
-        std::unique_ptr<RenderSystem> render_system = std::make_unique<RenderSystem>(registry.get());
+        auto render_system = std::make_unique<RenderSystem>(registry.get());
         systems.push_back(std::move(render_system));
+
+        auto player_input_system = std::make_unique<PlayerInputSystem>(registry.get());
+        systems.push_back(std::move(player_input_system));
+
+        auto move_system = std::make_unique<MoveSystem>(registry.get());
+        systems.push_back(std::move(move_system));
     }
 
     APP::~APP() {
@@ -41,10 +49,11 @@ namespace rpg {
         while (!WindowShouldClose()) {
             BeginDrawing();
             ClearBackground(BLACK);
-            scene->loop(GetFrameTime());
+
             for (const auto &system : systems) {
                 system->run(GetFrameTime());
             }
+            DrawFPS(10, 10);
 
             EndDrawing();
         }

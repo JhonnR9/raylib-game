@@ -7,23 +7,31 @@
 #include <algorithm>
 #include <iostream>
 
-#include "../components/color_rect.h"
-#include "../components/transform.h"
+#include "raymath.h"
+#include "../components/components.h"
 
 namespace rpg {
-
-    RenderSystem::RenderSystem(entt::registry* registry): System(registry) {
+    RenderSystem::RenderSystem(entt::registry *registry): System(registry) {
     }
 
     void RenderSystem::run(float dt) {
-
         auto view = registry->view<ColorRect, Transform>();
 
-        for (auto entity : view) {
-
+        for (const auto entity: view) {
             auto &color_rect = view.get<ColorRect>(entity);
-            auto &transform = view.get<rpg::Transform>(entity);
-            DrawRectangle(transform.position.x, transform.position.y, color_rect.width, color_rect.height, color_rect.color);
+            const auto &transform = view.get<rpg::Transform>(entity);
+
+            const Rectangle rec(
+                transform.position.x,
+                transform.position.y,
+                color_rect.width, color_rect.height
+            );
+
+            DrawRectanglePro(
+                rec,
+                transform.position/2,
+                transform.rotation,
+                color_rect.color);
         }
     }
 } // rpg

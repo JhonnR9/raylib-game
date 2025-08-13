@@ -17,7 +17,6 @@ public:
         this->registry = registry;
     };
     virtual void init() =0;
-    virtual void loop(float dt)=0;
 
 };
 
