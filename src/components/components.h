@@ -1,0 +1,47 @@
+//
+// Created by jhone on 13/08/2025.
+//
+
+#ifndef COMPONENTS_H
+#define COMPONENTS_H
+
+#include <raylib.h>
+
+namespace rpg {
+
+    struct ColorRect {
+        Color color;
+        float width;
+        float height;
+    };
+
+    struct  Input {
+        Vector2 move_direction;
+    };
+
+    struct  Sprite {
+        Texture2D* texture;
+        Vector2 uv;
+        Vector2 size;
+    };
+
+    struct Transform {
+        Vector2 position;
+        float rotation;
+        Vector2 scale;
+    };
+
+    struct BoxCollider2D {
+        float width = 0;
+        float height = 0;
+        bool collided = false;
+        bool isTrigger = false;
+    };
+
+    struct Velocity {
+        Vector2 value;
+    };
+
+} // rpg
+
+#endif //COMPONENTS_H
