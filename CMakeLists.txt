@@ -61,7 +61,9 @@ add_executable(raylib_game
         src/systems/player_input_system.h
         src/systems/player_input_system.cpp
         src/systems/move_system.cpp
-        src/systems/move_system.h)
+        src/systems/move_system.h
+        src/systems/collider_system.cpp
+        src/systems/collider_system.h)
 
 target_include_directories(raylib_game
         PRIVATE

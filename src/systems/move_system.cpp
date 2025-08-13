@@ -16,9 +16,7 @@ namespace rpg {
     }
 
     void MoveSystem::run(float dt) {
-
-        auto view = registry->view<Input, Transform>();
-        for (const auto entity: view) {
+        for (auto view = registry->view<Input, Transform>(); const auto entity: view) {
             auto &&[input, transform] = view.get<Input, Transform>(entity);
 
             input.move_direction = Vector2Normalize(input.move_direction);

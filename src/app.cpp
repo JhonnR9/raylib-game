@@ -6,6 +6,7 @@
 #include <iostream>
 #include <raylib.h>
 #include "scenes/my_scene.h"
+#include "systems/collider_system.h"
 #include "systems/move_system.h"
 #include "systems/player_input_system.h"
 #include "systems/render_system.h"
@@ -37,6 +38,9 @@ namespace rpg {
 
         auto move_system = std::make_unique<MoveSystem>(registry.get());
         systems.push_back(std::move(move_system));
+
+        auto collision_system = std::make_unique<ColliderSystem>(registry.get());
+        systems.push_back(std::move(collision_system));
     }
 
     APP::~APP() {

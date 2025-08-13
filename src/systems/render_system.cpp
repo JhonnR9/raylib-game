@@ -29,7 +29,7 @@ namespace rpg {
 
             DrawRectanglePro(
                 rec,
-                transform.position/2,
+                Vector2(color_rect.width, color_rect.height)/2,
                 transform.rotation,
                 color_rect.color);
         }
