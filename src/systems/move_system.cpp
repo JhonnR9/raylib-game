@@ -16,19 +16,18 @@ namespace rpg {
     }
 
     void MoveSystem::run(float dt) {
-        for (auto view = registry->view<Input, Transform>(); const auto entity: view) {
-            auto &&[input, transform] = view.get<Input, Transform>(entity);
+        for (auto view = registry->view<Input, Transform, MovementData>(); const auto entity: view) {
+            auto &&[input, transform, movement_data] = view.get<Input, Transform, MovementData>(entity);
 
+            movement_data.previous_position = transform.position;
             input.move_direction = Vector2Normalize(input.move_direction);
 
-            const Vector2 scaled_direction = {
-                input.move_direction.x  * dt *200,
-                input.move_direction.y  * dt *200
+            movement_data.velocity = {
+                input.move_direction.x * dt * movement_data.speed,
+                input.move_direction.y * dt * movement_data.speed
             };
 
-            transform.position = Vector2Add(transform.position, scaled_direction);
-
+            transform.position = Vector2Add(transform.position, movement_data.velocity);
         }
     }
-
 } // rpg

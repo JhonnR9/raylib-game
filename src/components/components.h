@@ -9,19 +9,18 @@
 #include <unordered_set>
 
 namespace rpg {
-
     struct ColorRect {
         Color color;
         float width;
         float height;
     };
 
-    struct  Input {
+    struct Input {
         Vector2 move_direction;
     };
 
-    struct  Sprite {
-        Texture2D* texture;
+    struct Sprite {
+        Texture2D *texture;
         Vector2 uv;
         Vector2 size;
     };
@@ -37,13 +36,14 @@ namespace rpg {
         float height = 0;
         bool is_colliding = false;
         bool is_trigger = false;
-         std::unordered_set<entt::entity> colliding_entities;
+        std::unordered_set<entt::entity> colliding_entities;
     };
 
-    struct Velocity {
-        Vector2 value;
+    struct MovementData {
+        Vector2 velocity;
+        float speed;
+        Vector2 previous_position;
     };
-
 } // rpg
 
 #endif //COMPONENTS_H

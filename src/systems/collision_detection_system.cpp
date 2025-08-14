@@ -53,23 +53,25 @@ namespace rpg {
     void CollisionDetectionSystem::populate_hash_grid_cells() {
         const auto entity_view = registry->view<BoxCollider2D, Transform>();
 
-        for (auto [entity_id, box_collider, transform] : entity_view.each()) {
+        for (auto [entity_id, box_collider, transform]: entity_view.each()) {
             register_entity_in_grid(entity_id, transform.position);
-            box_collider.is_colliding = false;  // Reset collision state
+            box_collider.is_colliding = false; // Reset collision state
             box_collider.colliding_entities.clear();
         }
     }
 
     // Checks collisions between a set of entities and stores results in local_collision_result
-    void CollisionDetectionSystem::check_collision(const std::vector<entt::entity> &entities,
-                                                   CollisionResult &local_collision_result) {
-        for (auto entity_a_id : entities) {
+    void CollisionDetectionSystem::check_collision(
+        const std::vector<entt::entity> &entities,
+        CollisionResult &local_collision_result
+    ) {
+        for (auto entity_a_id: entities) {
             auto &transform_a = registry->get<Transform>(entity_a_id);
             const auto &collider_a = registry->get<BoxCollider2D>(entity_a_id);
 
             auto nearby_entities = get_nearby_entities(transform_a.position);
 
-            for (auto entity_b_id : nearby_entities) {
+            for (auto entity_b_id: nearby_entities) {
                 if (entity_a_id == entity_b_id) continue; // Skip self-collision
 
                 // Sort entity pair to ensure consistent order (min, max)
@@ -81,8 +83,8 @@ namespace rpg {
                 // Avoid duplicate collision checks
                 if (local_collision_result.pairs.contains(entity_pair)) continue;
 
-                auto &transform_b = registry->get<Transform>(entity_b_id);
-                auto &collider_b = registry->get<BoxCollider2D>(entity_b_id);
+                const auto &transform_b = registry->get<Transform>(entity_b_id);
+                const auto &collider_b = registry->get<BoxCollider2D>(entity_b_id);
 
                 // Axis-Aligned Bounding Box (AABB) collision detection
                 const float a_min_x = transform_a.position.x - (collider_a.width / 2);
@@ -91,10 +93,10 @@ namespace rpg {
                 const float b_min_y = transform_b.position.y - (collider_b.height / 2);
 
                 const bool is_colliding =
-                    a_min_x < b_min_x + collider_b.width &&
-                    a_min_x + collider_a.width > b_min_x &&
-                    a_min_y < b_min_y + collider_b.height &&
-                    a_min_y + collider_a.height > b_min_y;
+                        a_min_x < b_min_x + collider_b.width &&
+                        a_min_x + collider_a.width > b_min_x &&
+                        a_min_y < b_min_y + collider_b.height &&
+                        a_min_y + collider_a.height > b_min_y;
 
                 if (is_colliding) {
                     local_collision_result.pairs.insert(entity_pair);
@@ -109,31 +111,31 @@ namespace rpg {
         populate_hash_grid_cells();
 
         // Extract all occupied grid cells
-        std::vector<std::pair<int, int>> all_cells;
+        std::vector<std::pair<int, int> > all_cells;
         all_cells.reserve(hash_grid_cells.size());
-        for (const auto &key : hash_grid_cells | std::views::keys) {
+        for (const auto &key: hash_grid_cells | std::views::keys) {
             all_cells.push_back(key);
         }
 
         // Perform parallel collision checks using transform_reduce
-        auto merged_result = std::transform_reduce(
+        CollisionResult merged_result = std::transform_reduce(
             std::execution::par,
             all_cells.begin(),
             all_cells.end(),
             CollisionResult{},
 
             // Merge local results into one
-            [](CollisionResult a, const CollisionResult& b) {
+            [](CollisionResult a, const CollisionResult &b) {
                 a.pairs.insert(b.pairs.begin(), b.pairs.end());
                 return a;
             },
 
             // Check collisions in each cell
-            [&](const auto& cell_coord) {
+            [&](const auto &cell_coord) {
                 CollisionResult local;
 
                 if (auto it = hash_grid_cells.find(cell_coord); it != hash_grid_cells.end()) {
-                    const auto& entities_in_cell = it->second;
+                    const auto &entities_in_cell = it->second;
                     check_collision(entities_in_cell, local);
                 }
                 return local;
@@ -142,7 +144,7 @@ namespace rpg {
 
         // Mark entities as colliding and store references
         std::unordered_set<std::pair<int, int>, pair_hash> processed_pairs;
-        for (auto &pair : merged_result.pairs) {
+        for (auto &pair: merged_result.pairs) {
             if (!processed_pairs.contains(pair)) {
                 processed_pairs.insert(pair);
 
