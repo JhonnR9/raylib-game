@@ -34,8 +34,9 @@ namespace rpg {
     struct BoxCollider2D {
         float width = 0;
         float height = 0;
-        bool collided = false;
-        bool isTrigger = false;
+        bool is_colliding = false;
+        bool is_trigger = false;
+         std::unordered_set<entt::entity> colliding_entities;
     };
 
     struct Velocity {
