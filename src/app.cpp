@@ -6,8 +6,9 @@
 #include <iostream>
 #include <raylib.h>
 #include "scenes/my_scene.h"
-#include "systems/collider_system.h"
+#include "systems/collision_detection_system.h"
 #include "systems/move_system.h"
+#include "systems/overlap_correction_system.h"
 #include "systems/player_input_system.h"
 #include "systems/render_system.h"
 #if BUILD_ATLAS_MODE
@@ -39,8 +40,11 @@ namespace rpg {
         auto move_system = std::make_unique<MoveSystem>(registry.get());
         systems.push_back(std::move(move_system));
 
-        auto collision_system = std::make_unique<ColliderSystem>(registry.get());
-        systems.push_back(std::move(collision_system));
+        auto collision_detection_system = std::make_unique<CollisionDetectionSystem>(registry.get());
+        systems.push_back(std::move(collision_detection_system));
+
+        auto overlap_correction_system = std::make_unique<OverlapCorrectionSystem>(registry.get());
+        systems.push_back(std::move(overlap_correction_system));
     }
 
     APP::~APP() {

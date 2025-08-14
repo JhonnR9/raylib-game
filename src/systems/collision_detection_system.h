@@ -16,17 +16,16 @@ namespace rpg {
         }
     };
 
-    class ColliderSystem final : public System {
+    class CollisionDetectionSystem final : public System {
         float hash_grid_cell_size{200.0f};
         std::unordered_map<std::pair<int, int>, std::vector<entt::entity>, pair_hash> hash_grid_cells;
 
         std::pair<int, int> get_hash_grid_cell(float x, float y) const;
         void register_entity_in_grid(entt::entity entity, const Vector2& position);
-        std::vector<entt::entity>& get_nearby_entities(const Vector2& position);
-        std::vector<entt::entity> nearby_cache;
+        std::vector<entt::entity> get_nearby_entities(const Vector2& position);
 
     public:
-        explicit ColliderSystem(entt::registry* registry);
+        explicit CollisionDetectionSystem(entt::registry* registry);
         void run(float dt) override;
     };
 

@@ -9,7 +9,6 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(RESOURCE_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 add_compile_definitions(BUILD_ATLAS_MODE=0)
-add_compile_definitions(BUILD_COLLISION_DEBUG_DRAW_MODE=1)
 
 # ====== Opções de Build ======
 if(NOT CMAKE_BUILD_TYPE)
@@ -63,8 +62,10 @@ add_executable(raylib_game
         src/systems/player_input_system.cpp
         src/systems/move_system.cpp
         src/systems/move_system.h
-        src/systems/collider_system.cpp
-        src/systems/collider_system.h)
+        src/systems/collision_detection_system.cpp
+        src/systems/collision_detection_system.h
+        src/systems/overlap_correction_system.cpp
+        src/systems/overlap_correction_system.h)
 
 target_include_directories(raylib_game
         PRIVATE

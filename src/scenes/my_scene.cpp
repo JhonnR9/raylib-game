@@ -14,15 +14,15 @@ rpg::MyScene::MyScene(entt::registry *registry): Scene(registry) {}
 void rpg::MyScene::init() {
     const auto player = registry->create();
 
-    registry->emplace<ColorRect>(player, Color(30, 200, 25, 255), 100, 100);
-    registry->emplace<Transform>(player, Transform(Vector2(100, 100), 0, Vector2(1, 1)));
+    registry->emplace<ColorRect>(player, Color(30, 200, 25, 255), 100.f, 100.f);
+    registry->emplace<Transform>(player, Transform(Vector2(100.f, 100.f), 0.f, Vector2(1.f, 1.f)));
     registry->emplace<Input>(player, Vector2(0, 0));
-    registry->emplace<BoxCollider2D>(player, 100, 100, false, false);
+    registry->emplace<BoxCollider2D>(player, 100.f, 100.f, false, false);
 
     const auto enemy = registry->create();
-    registry->emplace<ColorRect>(enemy, Color(138, 73, 51, 255), 100, 100);
-    registry->emplace<Transform>(enemy, Transform(Vector2(600, 400), 0, Vector2(1, 1)) );
-    registry->emplace<BoxCollider2D>(enemy, 100, 100, false, false);
+    registry->emplace<ColorRect>(enemy, Color(138, 73, 51, 255), 100.f, 100.f);
+    registry->emplace<Transform>(enemy, Transform(Vector2(600.f, 400.f), 0.f, Vector2(1.f, 1.f)) );
+    registry->emplace<BoxCollider2D>(enemy, 100.f, 100.f, false, false);
 
 }
 

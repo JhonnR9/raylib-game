@@ -6,6 +6,7 @@
 #define COMPONENTS_H
 
 #include <raylib.h>
+#include <unordered_set>
 
 namespace rpg {
 
