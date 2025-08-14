@@ -1,21 +1,34 @@
-//
-// Created by jhone on 13/08/2025.
-//
-
 #ifndef COLLIDER_SYSTEM_H
 #define COLLIDER_SYSTEM_H
+
 #include "system.h"
+#include <raylib.h>
+#include <unordered_map>
+#include <vector>
+#include <utility>
+#include <entt/entt.hpp>
 
 namespace rpg {
 
-class ColliderSystem: public System{
+    struct pair_hash {
+        std::size_t operator()(const std::pair<int, int>& p) const {
+            return std::hash<int>()(p.first) ^ (std::hash<int>()(p.second) << 1);
+        }
+    };
+
+    class ColliderSystem : public System {
+        float hash_grid_cell_size{200.0f};
+        std::unordered_map<std::pair<int, int>, std::vector<entt::entity>, pair_hash> hash_grid_cells;
+
+        std::pair<int, int> get_hash_grid_cell(float x, float y) const;
+        void register_pointer(entt::entity entity, const Vector2& position);
+        std::vector<entt::entity> get_nearby_entities(const Vector2& position);
 
     public:
-    explicit ColliderSystem(entt::registry* registry);
-    void run(float dt) override;
+        explicit ColliderSystem(entt::registry* registry);
+        void run(float dt) override;
+    };
 
-};
+} // namespace rpg
 
-} // rpg
-
-#endif //COLLIDER_SYSTEM_H
+#endif // COLLIDER_SYSTEM_H
