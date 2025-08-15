@@ -5,7 +5,7 @@
 #define OVERLAP_CORRECTION_SYSTEM_H
 #include "system.h"
 #include <unordered_set>
-#include "../components/components.h"
+#include "components/components.h"
 
 namespace rpg {
     // System responsible for resolving physical overlaps between 2D entities.

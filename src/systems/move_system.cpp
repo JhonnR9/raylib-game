@@ -3,11 +3,7 @@
 //
 
 #include "move_system.h"
-
-#include <iostream>
-
-
-#include "../components/components.h"
+#include "components/components.h"
 #include "raylib.h"
 #include "raymath.h"
 

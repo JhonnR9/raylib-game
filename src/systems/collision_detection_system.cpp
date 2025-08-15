@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include <mutex>
 #include <numeric>
-#include "../components/components.h"
+#include "components/components.h"
 
 namespace rpg {
 

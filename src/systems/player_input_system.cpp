@@ -1,6 +1,6 @@
 #include "player_input_system.h"
 
-#include "../components/components.h"
+#include "components/components.h"
 
 rpg::PlayerInputSystem::PlayerInputSystem(entt::registry *registry): System(registry) {
 }

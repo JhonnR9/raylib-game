@@ -48,31 +48,24 @@ FetchContent_MakeAvailable(nlohmann)
 add_executable(raylib_game
         src/main.cpp
         src/utils/texture_packer.cpp
-        src/utils/texture_packer.h
         src/app.cpp
-        src/app.h
-        src/scenes/scene.h
         src/scenes/my_scene.cpp
-        src/scenes/my_scene.h
-        src/components/components.h
         src/systems/render_system.cpp
-        src/systems/render_system.h
-        src/systems/system.h
-        src/systems/player_input_system.h
         src/systems/player_input_system.cpp
         src/systems/move_system.cpp
-        src/systems/move_system.h
         src/systems/collision_detection_system.cpp
-        src/systems/collision_detection_system.h
         src/systems/overlap_correction_system.cpp
-        src/systems/overlap_correction_system.h
-        src/utils/global_utils.h)
+        src/factories/entities_factory.h
+        src/factories/entities_factory.cpp
+)
 
 target_include_directories(raylib_game
         PRIVATE
         ${entt_SOURCE_DIR}/src
         ${nlohmann_SOURCE_DIR}/include
         vendor/stb_image
+        src/
+
 )
 
 target_compile_definitions(raylib_game PRIVATE RESOURCE_PATH="${RESOURCE_DIR}")

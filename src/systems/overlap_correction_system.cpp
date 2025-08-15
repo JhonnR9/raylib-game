@@ -1,5 +1,5 @@
 #include "overlap_correction_system.h"
-#include "../components/components.h"
+#include "components/components.h"
 #include <iostream>
 
 namespace rpg {

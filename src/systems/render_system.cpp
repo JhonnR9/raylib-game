@@ -8,7 +8,7 @@
 #include <iostream>
 
 #include "raymath.h"
-#include "../components/components.h"
+#include "components/components.h"
 
 namespace rpg {
     RenderSystem::RenderSystem(entt::registry *registry): System(registry) {

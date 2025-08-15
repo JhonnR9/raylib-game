@@ -3,27 +3,22 @@
 //
 
 #include "my_scene.h"
-
-#include <iostream>
-
-#include "raylib.h"
-#include "../components/components.h"
+#include "factories/entities_factory.h"
 
 rpg::MyScene::MyScene(entt::registry *registry): Scene(registry) {
 }
 
 void rpg::MyScene::init() {
-    const auto player = registry->create();
+    PlayerConfig player_config;
+    player_config.color_rect.color = RAYWHITE;
+    player_config.transform.position = {100.f, 200.f};
+    create_player(registry, player_config);
 
-    registry->emplace<ColorRect>(player, Color(30, 200, 25, 255), 100.f, 100.f);
-    registry->emplace<Transform>(player, Transform(Vector2(100.f, 100.f), 0.f, Vector2(1.f, 1.f)));
-    registry->emplace<Input>(player, Vector2(0, 0));
-    registry->emplace<BoxCollider2D>(player, 100.f, 100.f, false, false, false);
-    registry->emplace<MovementData>(player, Vector2(0.f, 0.f), 300.f, Vector2(0.f, 0.f));
-
-    const auto enemy = registry->create();
-    registry->emplace<ColorRect>(enemy, Color(138, 73, 51, 255), 100.f, 100.f);
-    registry->emplace<Transform>(enemy, Transform(Vector2(600.f, 400.f), 0.f, Vector2(1.f, 1.f)));
-    registry->emplace<BoxCollider2D>(enemy, 100.f, 100.f, false, false, true);
-    registry->emplace<MovementData>(enemy, Vector2(0.f, 0.f), 300.f, Vector2(0.f, 0.f));
+    EnemyConfig enemy_config;
+    enemy_config.transform.position = {200.f, 100.f};
+    enemy_config.color_rect.color = {220, 220, 220, 255};
+    enemy_config.color_rect.width = 25.f;
+    enemy_config.collider.width = 25.f;
+    create_enemy(registry, enemy_config);
 }
+
