@@ -57,6 +57,8 @@ add_executable(raylib_game
         src/systems/overlap_correction_system.cpp
         src/factories/entities_factory.h
         src/factories/entities_factory.cpp
+        src/systems/camera_system.cpp
+        src/systems/camera_system.h
 )
 
 target_include_directories(raylib_game

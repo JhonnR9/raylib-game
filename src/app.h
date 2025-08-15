@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 
+#include "raylib.h"
 #include "scenes/scene.h"
 #include "systems/system.h"
 
@@ -15,7 +16,7 @@ namespace rpg {
         std::unique_ptr<Scene> scene;
         std::vector<std::unique_ptr<System>> systems;
         std::unique_ptr<entt::registry> registry;
-
+        Camera2D *camera;
     public:
         APP();
 

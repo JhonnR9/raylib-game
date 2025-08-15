@@ -11,6 +11,9 @@
 #include "systems/overlap_correction_system.h"
 #include "systems/player_input_system.h"
 #include "systems/render_system.h"
+
+#include "systems/camera_system.h"
+
 #if BUILD_ATLAS_MODE
 #include "utils/texture_packer.h"
 #endif
@@ -26,7 +29,7 @@ namespace rpg {
 
         SetTraceLogLevel(LOG_ERROR);
         InitWindow(800, 600, "raylib + entt - collision demo");
-        //SetTargetFPS(60);
+        SetTargetFPS(60);
 
         registry = std::make_unique<entt::registry>();
         scene = std::make_unique<MyScene>(registry.get());
@@ -43,6 +46,10 @@ namespace rpg {
         auto collision_detection_system = std::make_unique<CollisionDetectionSystem>(registry.get());
         systems.push_back(std::move(collision_detection_system));
 
+        auto camera_system = std::make_unique<CameraSystem>(registry.get());
+        camera = camera_system->get_camera();
+        systems.push_back(std::move(camera_system));
+
         auto overlap_correction_system = std::make_unique<OverlapCorrectionSystem>(registry.get());
         systems.push_back(std::move(overlap_correction_system));
     }
@@ -58,9 +65,11 @@ namespace rpg {
             BeginDrawing();
             ClearBackground(BLACK);
 
+            BeginMode2D(*camera);
             for (const auto &system : systems) {
                 system->run(GetFrameTime());
             }
+            EndMode2D();
             DrawFPS(10, 10);
 
             EndDrawing();
