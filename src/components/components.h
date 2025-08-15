@@ -36,6 +36,7 @@ namespace rpg {
         float height = 0;
         bool is_colliding = false;
         bool is_trigger = false;
+        bool is_static = false;
         std::unordered_set<entt::entity> colliding_entities;
     };
 
