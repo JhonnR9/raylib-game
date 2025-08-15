@@ -69,7 +69,7 @@ namespace rpg {
             auto &transform_a = registry->get<Transform>(entity_a_id);
             const auto &collider_a = registry->get<BoxCollider2D>(entity_a_id);
 
-            auto nearby_entities = get_nearby_entities(transform_a.position);
+            std::vector<entt::entity> nearby_entities = get_nearby_entities(transform_a.position);
 
             for (auto entity_b_id: nearby_entities) {
                 if (entity_a_id == entity_b_id) continue; // Skip self-collision
@@ -143,7 +143,7 @@ namespace rpg {
         );
 
         // Mark entities as colliding and store references
-        std::unordered_set<std::pair<int, int>, pair_hash> processed_pairs;
+        std::unordered_set<std::pair<int, int>, PairHash> processed_pairs;
         for (auto &pair: merged_result.pairs) {
             if (!processed_pairs.contains(pair)) {
                 processed_pairs.insert(pair);

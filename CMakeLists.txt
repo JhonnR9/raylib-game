@@ -65,7 +65,8 @@ add_executable(raylib_game
         src/systems/collision_detection_system.cpp
         src/systems/collision_detection_system.h
         src/systems/overlap_correction_system.cpp
-        src/systems/overlap_correction_system.h)
+        src/systems/overlap_correction_system.h
+        src/utils/global_utils.h)
 
 target_include_directories(raylib_game
         PRIVATE
