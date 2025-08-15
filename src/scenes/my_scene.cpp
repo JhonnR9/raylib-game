@@ -4,18 +4,22 @@
 
 #include "my_scene.h"
 #include "factories/entities_factory.h"
-
+#include <random>
 
 rpg::MyScene::MyScene(entt::registry *registry): Scene(registry) {
 }
-// Constantes configuráveis
-constexpr int ENEMY_QUANTITY = 1000;   // Quantidade de inimigos
-constexpr float MAP_WIDTH = 10000.f;    // Largura do mapa
-constexpr float MAP_HEIGHT = 8000.f;    // Altura do mapa
-constexpr float ENEMY_SIZE = 50.f;     // Tamanho dos inimigos
+
+constexpr int ENEMY_QUANTITY = 1000;
+constexpr float MAP_WIDTH = 10000.f;
+constexpr float MAP_HEIGHT = 10000.f;
+constexpr float ENEMY_SIZE = 50.f;
 void rpg::MyScene::init() {
-    // Inicializa srand para gerar números aleatórios diferentes a cada execução
-    srand(static_cast<unsigned int>(time(nullptr)));
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::uniform_real_distribution<float> distX(0.f, MAP_WIDTH);
+    std::uniform_real_distribution<float> distY(0.f, MAP_HEIGHT);
+    std::uniform_int_distribution<int> distColor(100, 255);
 
     PlayerConfig player_config;
     player_config.color_rect.color = RAYWHITE;
@@ -29,16 +33,13 @@ void rpg::MyScene::init() {
     enemy_config.collider.height = ENEMY_SIZE;
 
     for (int i = 0; i < ENEMY_QUANTITY; ++i) {
-        // Posições aleatórias dentro do mapa
-        float x = static_cast<float>(rand()) / RAND_MAX * MAP_WIDTH;
-        float y = static_cast<float>(rand()) / RAND_MAX * MAP_HEIGHT;
-
+        float x = distX(gen);
+        float y = distY(gen);
         enemy_config.transform.position = {x, y};
 
-        // Cores aleatórias (R,G,B) entre 100 e 255 para evitar cores muito escuras
-        enemy_config.color_rect.color.r = 100 + rand() % 156;
-        enemy_config.color_rect.color.g = 100 + rand() % 156;
-        enemy_config.color_rect.color.b = 100 + rand() % 156;
+        enemy_config.color_rect.color.r = distColor(gen);
+        enemy_config.color_rect.color.g = distColor(gen);
+        enemy_config.color_rect.color.b = distColor(gen);
         enemy_config.color_rect.color.a = 255;
 
         create_enemy(registry, enemy_config);
