@@ -11,6 +11,7 @@
 #include "../components/components.h"
 
 namespace rpg {
+
     CollisionDetectionSystem::CollisionDetectionSystem(entt::registry *registry)
         : System(registry) {
     }
@@ -75,10 +76,7 @@ namespace rpg {
                 if (entity_a_id == entity_b_id) continue; // Skip self-collision
 
                 // Sort entity pair to ensure consistent order (min, max)
-                auto entity_pair = std::minmax(
-                    static_cast<int>(entity_a_id),
-                    static_cast<int>(entity_b_id)
-                );
+                auto entity_pair = std::minmax(entity_a_id, entity_b_id);
 
                 // Avoid duplicate collision checks
                 if (local_collision_result.pairs.contains(entity_pair)) continue;
@@ -111,7 +109,7 @@ namespace rpg {
         populate_hash_grid_cells();
 
         // Extract all occupied grid cells
-        std::vector<std::pair<int, int> > all_cells;
+        std::vector<std::pair<int, int>> all_cells;
         all_cells.reserve(hash_grid_cells.size());
         for (const auto &key: hash_grid_cells | std::views::keys) {
             all_cells.push_back(key);
@@ -143,13 +141,13 @@ namespace rpg {
         );
 
         // Mark entities as colliding and store references
-        std::unordered_set<std::pair<int, int>, PairHash> processed_pairs;
+        std::unordered_set<std::pair<entt::entity, entt::entity>, EntityPairHash, EntityPairEqual> processed_pairs;
         for (auto &pair: merged_result.pairs) {
             if (!processed_pairs.contains(pair)) {
                 processed_pairs.insert(pair);
 
-                auto entity_a_id = static_cast<entt::entity>(pair.first);
-                auto entity_b_id = static_cast<entt::entity>(pair.second);
+                auto entity_a_id = pair.first;
+                auto entity_b_id = pair.second;
 
                 auto &collider_a = registry->get<BoxCollider2D>(entity_a_id);
                 auto &collider_b = registry->get<BoxCollider2D>(entity_b_id);
@@ -161,4 +159,25 @@ namespace rpg {
             }
         }
     }
+
+    std::size_t CollisionDetectionSystem::EntityPairHash::operator()(
+     const std::pair<entt::entity, entt::entity> &pair) const {
+        // Normalize entity order so hash is symmetric
+        const entt::entity min_entity = std::min(pair.first, pair.second);
+        const entt::entity max_entity = std::max(pair.first, pair.second);
+
+        const size_t hash_min = std::hash<entt::entity>()(min_entity);
+        const size_t hash_max = std::hash<entt::entity>()(max_entity);
+
+        // Combine hashes using a variant of boost::hash_combine
+        return hash_min ^ (hash_max + 0x9e3779b9 + (hash_min << 6) + (hash_min >> 2));
+    }
+
+    bool CollisionDetectionSystem::EntityPairEqual::operator()(const std::pair<entt::entity, entt::entity> &lhs,
+                                                              const std::pair<entt::entity, entt::entity> &rhs) const {
+        // Equal if both entities match, regardless of order
+        return (lhs.first == rhs.first && lhs.second == rhs.second) ||
+               (lhs.first == rhs.second && lhs.second == rhs.first);
+    }
+
 } // namespace rpg

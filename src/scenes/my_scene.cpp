@@ -24,6 +24,6 @@ void rpg::MyScene::init() {
     const auto enemy = registry->create();
     registry->emplace<ColorRect>(enemy, Color(138, 73, 51, 255), 100.f, 100.f);
     registry->emplace<Transform>(enemy, Transform(Vector2(600.f, 400.f), 0.f, Vector2(1.f, 1.f)));
-    registry->emplace<BoxCollider2D>(enemy, 100.f, 100.f, false, false, false);
+    registry->emplace<BoxCollider2D>(enemy, 100.f, 100.f, false, false, true);
     registry->emplace<MovementData>(enemy, Vector2(0.f, 0.f), 300.f, Vector2(0.f, 0.f));
 }
