@@ -13,6 +13,7 @@ constexpr int ENEMY_QUANTITY = 1000;
 constexpr float MAP_WIDTH = 10000.f;
 constexpr float MAP_HEIGHT = 10000.f;
 constexpr float ENEMY_SIZE = 50.f;
+
 void rpg::MyScene::init() {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -31,6 +32,7 @@ void rpg::MyScene::init() {
     enemy_config.color_rect.height = ENEMY_SIZE;
     enemy_config.collider.width = ENEMY_SIZE;
     enemy_config.collider.height = ENEMY_SIZE;
+    enemy_config.collider.is_static = false;
 
     for (int i = 0; i < ENEMY_QUANTITY; ++i) {
         float x = distX(gen);

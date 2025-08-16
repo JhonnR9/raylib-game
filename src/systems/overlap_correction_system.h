@@ -3,65 +3,76 @@
 
 #ifndef OVERLAP_CORRECTION_SYSTEM_H
 #define OVERLAP_CORRECTION_SYSTEM_H
+#include <optional>
+
 #include "system.h"
 #include <unordered_set>
 #include "components/components.h"
 
 namespace rpg {
-    // System responsible for resolving physical overlaps between 2D entities.
+
+    // Estrutura representando contexto de colisão entre duas entidades
+    struct CollisionContext {
+        entt::entity entityA;
+        entt::entity entityB;
+        BoxCollider2D& colliderA;
+        BoxCollider2D& colliderB;
+        Transform& transformA;
+        Transform& transformB;
+    };
+
+    //Overlap calculation result
+    struct OverlapResult {
+        Vector2 delta;   // Distance between centers
+        float x;         // Overlay on the X axis
+        float y;         // Overlay on the Y axis
+
+        [[nodiscard]] bool has_penetration() const {
+            return x > 0 && y > 0;
+        }
+    };
+
+    // System responsible for resolving physical overlap between 2D entities.
     class OverlapCorrectionSystem final : public System {
-        // Hash function for entity pairs, order-independent.
+        // Symmetric hash for pairs of entities
         struct EntityPairHash {
-            std::size_t operator()(const std::pair<entt::entity, entt::entity> &pair) const;
+            std::size_t operator()(const std::pair<entt::entity, entt::entity>& pair) const;
         };
 
-        // Equality check for entity pairs, order-independent.
+        // Symmetric equality between pairs of entities
         struct EntityPairEqual {
-            bool operator()(
-                const std::pair<entt::entity, entt::entity> &lhs,
-                const std::pair<entt::entity, entt::entity> &rhs
-            ) const;
+            bool operator()(const std::pair<entt::entity, entt::entity>& lhs,
+                            const std::pair<entt::entity, entt::entity>& rhs) const;
         };
 
-        // Tracks processed entity pairs to avoid double-resolving collisions in the same frame.
+        // Avoid processing the same pair twice in the same frame
         std::unordered_set<std::pair<entt::entity, entt::entity>, EntityPairHash, EntityPairEqual>
-        processed_pairs;
+            processed_pairs;
 
     public:
-        explicit OverlapCorrectionSystem(entt::registry *registry);
+        explicit OverlapCorrectionSystem(entt::registry* registry);
 
         void run(float delta_time) override;
 
     private:
-        // Skips entities that should not be part of collision resolution.
-        static bool should_skip_entity(const BoxCollider2D &collider);
+        // --- Main Helpers ---
 
-        // Checks if a given pair of entities has already been processed this frame.
-        bool is_pair_already_processed(entt::entity entity_a, entt::entity entity_b);
+        static bool should_skip_entity(const BoxCollider2D& collider);
 
-        // Calculates the overlap distances on X and Y axes between two BoxColliders.
-        static std::pair<float, float> compute_overlap(
-            const BoxCollider2D &collider_a, const Transform &transform_a,
-            const BoxCollider2D &collider_b, const Transform &transform_b);
+        bool has_already_processed(entt::entity a, entt::entity b);
 
-        // Selects which entity should be moved to resolve overlap.
-        bool select_movable_entity(
-            entt::entity entity_a, entt::entity entity_b,
-            const BoxCollider2D &collider_a,
-            const BoxCollider2D &collider_b,
-            Transform *&movable_transform,
-            MovementData *&movable_movement
-        ) const;
+        static OverlapResult calculate_overlap(const CollisionContext& ctx);
 
-        // Adjusts position and zeroes velocity on the axis of resolution.
-        static void apply_overlap_resolution(
-            Vector2 delta, float overlap_x, float overlap_y,
-            Transform *transform, MovementData *movement
-        );
+        static void resolve_overlap(const OverlapResult& overlap,
+                                    Transform& movable_transform,
+                                    MovementData& movable_movement);
 
-        // Debug helper: draws the collider outline.
-        static void draw_debug_collider(const Transform &transform, const BoxCollider2D &collider);
+        std::optional<std::pair<Transform&, MovementData&>>
+        choose_movable_entity(const CollisionContext& ctx) const;
+
+        static void draw_debug(const CollisionContext& ctx);
     };
+
 } // namespace rpg
 
 #endif // OVERLAP_CORRECTION_SYSTEM_H
