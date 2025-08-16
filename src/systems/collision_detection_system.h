@@ -35,7 +35,7 @@ namespace rpg {
             std::unordered_set<std::pair<entt::entity, entt::entity>, EntityPairHash, EntityPairEqual> pairs;
         };
 
-        float hash_grid_cell_size{350.0f};
+        float hash_grid_cell_size{250.0f};
         std::unordered_map<std::pair<int, int>, std::vector<entt::entity>, PairHash> hash_grid_cells;
 
         std::pair<int, int> get_hash_grid_cell(float x, float y) const;

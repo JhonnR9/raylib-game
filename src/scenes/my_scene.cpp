@@ -1,6 +1,4 @@
-//
 // Created by jhone on 12/08/2025.
-//
 
 #include "my_scene.h"
 #include "factories/entities_factory.h"
@@ -9,18 +7,18 @@
 rpg::MyScene::MyScene(entt::registry *registry): Scene(registry) {
 }
 
-constexpr int ENEMY_QUANTITY = 1000;
-constexpr float MAP_WIDTH = 10000.f;
-constexpr float MAP_HEIGHT = 10000.f;
+constexpr int ENEMY_QUANTITY = 20;
+constexpr float MAP_WIDTH = 1500;
+constexpr float MAP_HEIGHT = 1500;
 constexpr float ENEMY_SIZE = 50.f;
 
 void rpg::MyScene::init() {
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    std::uniform_real_distribution<float> distX(0.f, MAP_WIDTH);
-    std::uniform_real_distribution<float> distY(0.f, MAP_HEIGHT);
-    std::uniform_int_distribution<int> distColor(100, 255);
+    std::normal_distribution<float> distX(MAP_WIDTH / 2.f, 300.f);
+    std::normal_distribution<float> distY(MAP_HEIGHT / 2.f, 300.f);
+    std::uniform_int_distribution distColor(100, 255);
 
     PlayerConfig player_config;
     player_config.color_rect.color = RAYWHITE;
@@ -35,8 +33,8 @@ void rpg::MyScene::init() {
     enemy_config.collider.is_static = false;
 
     for (int i = 0; i < ENEMY_QUANTITY; ++i) {
-        float x = distX(gen);
-        float y = distY(gen);
+        float x = std::clamp(distX(gen), 0.f, MAP_WIDTH);
+        float y = std::clamp(distY(gen), 0.f, MAP_HEIGHT);
         enemy_config.transform.position = {x, y};
 
         enemy_config.color_rect.color.r = distColor(gen);

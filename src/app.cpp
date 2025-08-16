@@ -29,13 +29,12 @@ namespace rpg {
 
         SetTraceLogLevel(LOG_ERROR);
         InitWindow(800, 600, "raylib + entt - collision demo");
-        SetTargetFPS(60);
+        //SetTargetFPS(60);
 
         registry = std::make_unique<entt::registry>();
         scene = std::make_unique<MyScene>(registry.get());
 
-        auto render_system = std::make_unique<RenderSystem>(registry.get());
-        systems.push_back(std::move(render_system));
+
 
         auto player_input_system = std::make_unique<PlayerInputSystem>(registry.get());
         systems.push_back(std::move(player_input_system));
@@ -52,6 +51,9 @@ namespace rpg {
 
         auto overlap_correction_system = std::make_unique<OverlapCorrectionSystem>(registry.get());
         systems.push_back(std::move(overlap_correction_system));
+
+         auto render_system = std::make_unique<RenderSystem>(registry.get());
+         systems.push_back(std::move(render_system));
     }
 
     APP::~APP() {
