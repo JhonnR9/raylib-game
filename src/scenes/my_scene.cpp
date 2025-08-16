@@ -30,7 +30,7 @@ void rpg::MyScene::init() {
     enemy_config.color_rect.height = ENEMY_SIZE;
     enemy_config.collider.width = ENEMY_SIZE;
     enemy_config.collider.height = ENEMY_SIZE;
-    enemy_config.collider.is_static = true;
+    enemy_config.collider.is_static = false;
 
     for (int i = 0; i < ENEMY_QUANTITY; ++i) {
         float x = distX(gen);

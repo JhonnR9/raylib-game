@@ -29,7 +29,7 @@ namespace rpg {
 
         SetTraceLogLevel(LOG_ERROR);
         InitWindow(800, 600, "raylib + entt - collision demo");
-        //SetTargetFPS(60);
+        SetTargetFPS(60);
 
         registry = std::make_unique<entt::registry>();
         scene = std::make_unique<MyScene>(registry.get());
