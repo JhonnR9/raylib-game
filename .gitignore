@@ -1,0 +1,6 @@
+# Ignorar pastas de build do CMake
+cmake-build-debug/
+cmake-build-release/
+
+# Ignorar configuração do IntelliJ/CLion (.idea)
+.idea/
