@@ -11,12 +11,12 @@
 namespace rpg {
     // Represents collision context between two entities
     struct CollisionContext {
-        entt::entity entityA;
-        entt::entity entityB;
-        BoxCollider2D &colliderA;
-        BoxCollider2D &colliderB;
-        Transform &transformA;
-        Transform &transformB;
+        entt::entity entity_a;
+        entt::entity entity_b;
+        BoxCollider2D &collider_a;
+        BoxCollider2D &collider_b;
+        Transform &transform_a;
+        Transform &transform_b;
     };
 
     // Overlap calculation result
@@ -47,10 +47,7 @@ namespace rpg {
         static OverlapResult calculate_overlap(const CollisionContext &ctx);
         static Vector2 compute_correction(const OverlapResult &overlap);
 
-        void apply_corrections(
-            const std::unordered_map<entt::entity, CorrectionIntent> &corrections,
-            float epsilon
-        );
+        void apply_corrections(const std::unordered_map<entt::entity, CorrectionIntent> &corrections);
     };
 } // namespace rpg
 

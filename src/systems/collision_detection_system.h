@@ -40,7 +40,7 @@ namespace rpg {
 
         std::pair<int, int> get_hash_grid_cell(float x, float y) const;
         void register_entity_in_grid(entt::entity entity, const Vector2& position);
-        std::vector<entt::entity> get_nearby_entities(const Vector2& position);
+        std::vector<entt::entity>& get_nearby_entities(const Vector2& position);
 
         void populate_hash_grid_cells();
         void check_collision(const std::vector<entt::entity>& entities, CollisionResult &local_collision_result);

@@ -7,7 +7,7 @@
 rpg::MyScene::MyScene(entt::registry *registry): Scene(registry) {
 }
 
-constexpr int ENEMY_QUANTITY = 20;
+constexpr int ENEMY_QUANTITY = 50;
 constexpr float MAP_WIDTH = 1500;
 constexpr float MAP_HEIGHT = 1500;
 constexpr float ENEMY_SIZE = 50.f;
@@ -16,8 +16,8 @@ void rpg::MyScene::init() {
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    std::normal_distribution<float> distX(MAP_WIDTH / 2.f, 300.f);
-    std::normal_distribution<float> distY(MAP_HEIGHT / 2.f, 300.f);
+    std::uniform_real_distribution<float> distX(0.f, MAP_WIDTH);
+    std::uniform_real_distribution<float> distY(0.f, MAP_HEIGHT);
     std::uniform_int_distribution distColor(100, 255);
 
     PlayerConfig player_config;
@@ -30,11 +30,11 @@ void rpg::MyScene::init() {
     enemy_config.color_rect.height = ENEMY_SIZE;
     enemy_config.collider.width = ENEMY_SIZE;
     enemy_config.collider.height = ENEMY_SIZE;
-    enemy_config.collider.is_static = false;
+    enemy_config.collider.is_static = true;
 
     for (int i = 0; i < ENEMY_QUANTITY; ++i) {
-        float x = std::clamp(distX(gen), 0.f, MAP_WIDTH);
-        float y = std::clamp(distY(gen), 0.f, MAP_HEIGHT);
+        float x = distX(gen);
+        float y = distY(gen);
         enemy_config.transform.position = {x, y};
 
         enemy_config.color_rect.color.r = distColor(gen);

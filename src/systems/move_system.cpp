@@ -19,11 +19,11 @@ namespace rpg {
             input.move_direction = Vector2Normalize(input.move_direction);
 
             movement_data.velocity = {
-                input.move_direction.x * dt * movement_data.speed,
-                input.move_direction.y * dt * movement_data.speed
+                input.move_direction.x  * movement_data.speed,
+                input.move_direction.y  * movement_data.speed
             };
 
-            transform.position = Vector2Add(transform.position, movement_data.velocity);
+            transform.position = Vector2Add(transform.position, Vector2Scale(movement_data.velocity, dt));
         }
     }
 } // rpg

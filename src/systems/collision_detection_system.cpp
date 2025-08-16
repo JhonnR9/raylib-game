@@ -31,17 +31,17 @@ namespace rpg {
     }
 
     // Collects all nearby entities within a 3x3 grid neighborhood
-    std::vector<entt::entity> CollisionDetectionSystem::get_nearby_entities(const Vector2 &position) {
-        std::vector<entt::entity> nearby_entities;
+    std::vector<entt::entity>& CollisionDetectionSystem::get_nearby_entities(const Vector2 &position) {
+        thread_local std::vector<entt::entity> nearby_entities;
+        nearby_entities.clear();
+
         const auto base_cell = get_hash_grid_cell(position.x, position.y);
         const auto [first, second] = base_cell;
 
-        // Iterate over surrounding 3x3 grid cells
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 auto cell = std::make_pair(first + dx, second + dy);
                 if (auto it = hash_grid_cells.find(cell); it != hash_grid_cells.end()) {
-                    // Append all entities in the neighbor cell
                     nearby_entities.insert(nearby_entities.end(), it->second.begin(), it->second.end());
                 }
             }
@@ -49,6 +49,7 @@ namespace rpg {
 
         return nearby_entities;
     }
+
 
     // Populates the hash grid with entities and resets their collision state
     void CollisionDetectionSystem::populate_hash_grid_cells() {
@@ -70,7 +71,7 @@ namespace rpg {
             auto &transform_a = registry->get<Transform>(entity_a_id);
             const auto &collider_a = registry->get<BoxCollider2D>(entity_a_id);
 
-            std::vector<entt::entity> nearby_entities = get_nearby_entities(transform_a.position);
+            std::vector<entt::entity>& nearby_entities = get_nearby_entities(transform_a.position);
 
             for (auto entity_b_id: nearby_entities) {
                 if (entity_a_id == entity_b_id) continue; // Skip self-collision

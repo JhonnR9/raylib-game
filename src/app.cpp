@@ -45,12 +45,13 @@ namespace rpg {
         auto collision_detection_system = std::make_unique<CollisionDetectionSystem>(registry.get());
         systems.push_back(std::move(collision_detection_system));
 
+        auto overlap_correction_system = std::make_unique<OverlapCorrectionSystem>(registry.get());
+        systems.push_back(std::move(overlap_correction_system));
+
         auto camera_system = std::make_unique<CameraSystem>(registry.get());
         camera = camera_system->get_camera();
         systems.push_back(std::move(camera_system));
 
-        auto overlap_correction_system = std::make_unique<OverlapCorrectionSystem>(registry.get());
-        systems.push_back(std::move(overlap_correction_system));
 
          auto render_system = std::make_unique<RenderSystem>(registry.get());
          systems.push_back(std::move(render_system));
@@ -64,6 +65,8 @@ namespace rpg {
         scene->init();
 
         while (!WindowShouldClose()) {
+
+
             BeginDrawing();
             ClearBackground(BLACK);
 
