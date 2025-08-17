@@ -7,9 +7,9 @@
 rpg::MyScene::MyScene(entt::registry *registry): Scene(registry) {
 }
 
-constexpr int ENEMY_QUANTITY = 100;
-constexpr float MAP_WIDTH = 2200;
-constexpr float MAP_HEIGHT = 2200;
+constexpr int ENEMY_QUANTITY = 12000;
+constexpr float MAP_WIDTH = 20200;
+constexpr float MAP_HEIGHT = 20200;
 constexpr float ENEMY_SIZE = 45.f;
 
 
@@ -26,21 +26,20 @@ void rpg::MyScene::init() {
     create_player(registry, player_config);
 
     EnemyConfig enemy_config;
-    enemy_config.color_rect.width = ENEMY_SIZE;
-    enemy_config.color_rect.height = ENEMY_SIZE;
     enemy_config.collider.width = ENEMY_SIZE;
     enemy_config.collider.height = ENEMY_SIZE;
     enemy_config.collider.is_static = false;
+    enemy_config.sprite.name="enemy.png";
 
     for (int i = 0; i < ENEMY_QUANTITY; ++i) {
         float x = distX(gen);
         float y = distY(gen);
         enemy_config.transform.position = {x, y};
 
-        enemy_config.color_rect.color.r = distColor(gen);
-        enemy_config.color_rect.color.g = distColor(gen);
-        enemy_config.color_rect.color.b = distColor(gen);
-        enemy_config.color_rect.color.a = 255;
+        enemy_config.sprite.color.r = distColor(gen);
+        enemy_config.sprite.color.g = distColor(gen);
+        enemy_config.sprite.color.b = distColor(gen);
+        enemy_config.sprite.color.a = 255;
 
         create_enemy(registry, enemy_config);
     }

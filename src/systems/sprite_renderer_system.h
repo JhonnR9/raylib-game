@@ -15,7 +15,6 @@ class SpriteRendererSystem : public System {
     Texture2D atlas_texture{};
     nlohmann::json json_data;
 
-    void draw(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint);
     std::unordered_map<std::string, Rectangle> uvs;
     bool load_resources();
 public:

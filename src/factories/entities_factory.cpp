@@ -19,7 +19,7 @@ void rpg::create_player(entt::registry *registry, const PlayerConfig& config) {
 
 void rpg::create_enemy(entt::registry *registry, const EnemyConfig& config) {
     const auto enemy = registry->create();
-    registry->emplace<ColorRect>(enemy, config.color_rect);
+    registry->emplace<Sprite>(enemy, config.sprite);
     registry->emplace<Transform>(enemy, config.transform);
     registry->emplace<BoxCollider2D>(enemy, config.collider);
     registry->emplace<MovementData>(enemy, config.movement_data);

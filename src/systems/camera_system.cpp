@@ -22,7 +22,7 @@ namespace rpg {
             camera.target = transform.position;
             camera.offset = (Vector2){800 / 2.0f, 600 / 2.0f};
             camera.rotation = 0.0f;
-            camera.zoom = 1.1f;
+            camera.zoom = 1.0f;
 
             is_synced = true;
         }

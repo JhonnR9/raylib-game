@@ -18,7 +18,7 @@ namespace rpg {
     void create_player(entt::registry* registry, const PlayerConfig& config);
 
     struct EnemyConfig {
-        ColorRect color_rect{ Color(138, 73, 51, 255), 100.f, 100.f };
+        Sprite sprite{"enemy.png", Vector2{10,10}, RAYWHITE };
         Transform transform{ {0.f, 0.f}, 0.f, {1.f, 1.f} };
         Input input{ {0.f, 0.f} };
         BoxCollider2D collider{ 100.f, 100.f, false, false, true };
