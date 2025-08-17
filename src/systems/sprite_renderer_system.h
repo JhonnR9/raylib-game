@@ -11,12 +11,19 @@
 
 namespace rpg {
 
-class SpriteRendererSystem : public System {
+class SpriteRendererSystem final : public System {
+    struct SpriteUV {
+        float width, height;
+        float sx, sy, sw, sh;
+    };
     Texture2D atlas_texture{};
     nlohmann::json json_data;
 
-    std::unordered_map<std::string, Rectangle> uvs;
+    std::unordered_map<std::string, SpriteUV> normalized_uvs;
     bool load_resources();
+    std::array<Vector2, 4>  verts_cache{};
+
+    void apply_rotation(const Rectangle &dest, const Vector2 &origin, float rotation_deg);
 public:
     explicit SpriteRendererSystem(entt::registry *registry);
     void run(float dt) override;

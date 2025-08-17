@@ -1,3 +1,9 @@
+// SpriteRendererSystem handles 2D sprite rendering using a texture atlas.
+// It uses data from the Transform and Sprite components (via entt ECS).
+// Rendering is done via rlgl (low-level API), so it's fully manual:
+// UVs, rotation, and vertex submission are computed and pushed per frame.
+
+
 #include "sprite_renderer_system.h"
 #include <fstream>
 #include <iostream>
@@ -6,6 +12,9 @@
 #include "components/components.h"
 
 namespace rpg {
+
+    // Loads texture atlas image and JSON metadata.
+    // This must succeed for the renderer to function correctly.
     bool SpriteRendererSystem::load_resources() {
         const Image atlas_image = LoadImage(RESOURCE_PATH "/atlas.png");
 
@@ -14,9 +23,11 @@ namespace rpg {
             return false;
         }
 
+        // Upload the atlas to GPU and unload the CPU-side image.
         atlas_texture = LoadTextureFromImage(atlas_image);
         UnloadImage(atlas_image);
 
+        // Open JSON file with sprite UV coordinates and dimensions.
         std::ifstream json_file(RESOURCE_PATH "/atlas.json");
         if (!json_file.is_open()) {
             std::cerr << "Failed to open " << RESOURCE_PATH "/atlas.json" << std::endl;
@@ -32,131 +43,148 @@ namespace rpg {
         return true;
     }
 
+    // Calculates the four corners of a quad, applying 2D rotation around a pivot (origin).
+    // Results are stored in `verts_cache` for later GPU upload.
+    void SpriteRendererSystem::apply_rotation(
+        const Rectangle &dest,
+        const Vector2 &origin,
+        const float rotation_deg
+    ) {
+        if (rotation_deg == 0.0f) {
+            // No rotation: just offset by the origin.
+            const float x = dest.x - origin.x;
+            const float y = dest.y - origin.y;
+
+            verts_cache[0] = {x, y}; // Top-left
+            verts_cache[1] = {x, y + dest.height}; // Bottom-left
+            verts_cache[2] = {x + dest.width, y + dest.height}; // Bottom-right
+            verts_cache[3] = {x + dest.width, y}; // Top-right
+        } else {
+            // Apply rotation using basic 2D rotation matrix
+            const float sinRot = sinf(rotation_deg * DEG2RAD);
+            const float cosRot = cosf(rotation_deg * DEG2RAD);
+            const float x = dest.x;
+            const float y = dest.y;
+            const float dx = -origin.x;
+            const float dy = -origin.y;
+
+            verts_cache[0] = {x + dx * cosRot - dy * sinRot, y + dx * sinRot + dy * cosRot}; // TL
+            verts_cache[1] = {
+                x + dx * cosRot - (dy + dest.height) * sinRot, y + dx * sinRot + (dy + dest.height) * cosRot
+            }; // BL
+            verts_cache[2] = {
+                x + (dx + dest.width) * cosRot - (dy + dest.height) * sinRot,
+                y + (dx + dest.width) * sinRot + (dy + dest.height) * cosRot
+            }; // BR
+            verts_cache[3] = {
+                x + (dx + dest.width) * cosRot - dy * sinRot,
+                y + (dx + dest.width) * sinRot + dy * cosRot
+            }; // TR
+        }
+    }
+
+    // Constructor: Initializes the system and loads sprite atlas metadata into memory.
     SpriteRendererSystem::SpriteRendererSystem(entt::registry *registry)
         : System(registry) {
         if (!load_resources()) return;
 
+        // Iterate over each sprite entry in the atlas.json
         for (auto &[key, value]: json_data.items()) {
             std::string name = key;
 
-            int x = value["x"];
-            int y = value["y"];
-            int width = value["width"];
-            int height = value["height"];
+            const float x = value["x"];
+            const float y = value["y"];
+            const float width = (value["width"]);
+            const float height = (value["height"]);
 
-            Rectangle rect(
-                static_cast<float>(x),
-                static_cast<float>(y),
-                static_cast<float>(width),
-                static_cast<float>(height)
-            );
+            const auto tex_width = static_cast<float>(atlas_texture.width);
+            const auto tex_height = static_cast<float>(atlas_texture.height);
 
-            uvs[name] = rect;
+            // Calculate normalized UV texture coordinates (0.0 to 1.0)
+            const float sx = x / tex_width;
+            const float sy = y / tex_height;
+            const float sw = width / tex_width;
+            const float sh = height / tex_height;
+
+            // Store sprite metadata (dimensions + UVs) for fast access during rendering
+            normalized_uvs[name] = {width, height, sx, sy, sw, sh};
         }
     }
 
+    // Main rendering function. Called every frame to draw all entities with Transform + Sprite.
     void SpriteRendererSystem::run(float dt) {
-        auto view = registry->view<Transform, Sprite>();
+        const auto view = registry->view<Transform, Sprite>();
 
         if (atlas_texture.id == 0) {
             std::cerr << "Atlas texture not loaded, skipping rendering." << std::endl;
             return;
         }
 
+        // Begin drawing textured quads using low-level rlgl API
         rlSetTexture(atlas_texture.id);
         rlBegin(RL_QUADS);
 
         for (auto [entity, transform, sprite]: view.each()) {
-            Rectangle source = uvs[sprite.name];
+            auto& [width, height, sx, sy, sw, sh] = normalized_uvs[sprite.name];
 
             bool flipX = false;
-            if (source.width < 0) {
+
+            // Flip horizontally if width is negative
+            if (width < 0) {
                 flipX = true;
-                source.width *= -1;
+                width *= -1;
             }
 
-            if (source.height < 0) {
-                source.y -= source.height;
+            // Adjust Y UV coordinate for vertically flipped sprites
+            if (height < 0) {
+                sy -= height;
             }
 
-            Rectangle dest = {
+            // Destination rectangle on screen
+            const Rectangle dest = {
                 transform.position.x,
                 transform.position.y,
-                source.width,
-                source.height
+                width,
+                height
             };
 
-            Vector2 origin = {
+            // Pivot point for rotation (centered on sprite)
+            const Vector2 origin = {
                 sprite.size.x * 0.5f,
                 sprite.size.y * 0.5f
             };
 
-            // Cálculo dos vértices com rotação
-            Vector2 verts[4];
-            if (transform.rotation == 0.0f) {
-                float x = dest.x - origin.x;
-                float y = dest.y - origin.y;
+            // Compute final vertex positions with rotation
+            apply_rotation(dest, origin, transform.rotation);
 
-                verts[0] = {x, y}; // Top-left
-                verts[1] = {x, y + dest.height}; // Bottom-left
-                verts[2] = {x + dest.width, y + dest.height}; // Bottom-right
-                verts[3] = {x + dest.width, y}; // Top-right
-            } else {
-                float sinRot = sinf(transform.rotation * DEG2RAD);
-                float cosRot = cosf(transform.rotation * DEG2RAD);
-                float x = dest.x;
-                float y = dest.y;
-                float dx = -origin.x;
-                float dy = -origin.y;
-
-                verts[0] = {x + dx * cosRot - dy * sinRot, y + dx * sinRot + dy * cosRot}; // TL
-                verts[1] = {
-                    x + dx * cosRot - (dy + dest.height) * sinRot,
-                    y + dx * sinRot + (dy + dest.height) * cosRot
-                }; // BL
-                verts[2] = {
-                    x + (dx + dest.width) * cosRot - (dy + dest.height) * sinRot,
-                    y + (dx + dest.width) * sinRot + (dy + dest.height) * cosRot
-                }; // BR
-                verts[3] = {
-                    x + (dx + dest.width) * cosRot - dy * sinRot,
-                    y + (dx + dest.width) * sinRot + dy * cosRot
-                }; // TR
-            }
-
-            float texWidth = (float) atlas_texture.width;
-            float texHeight = (float) atlas_texture.height;
-
-            float sx = source.x / texWidth;
-            float sy = source.y / texHeight;
-            float sw = source.width / texWidth;
-            float sh = source.height / texHeight;
-
-            float tx[4] = {
+            // UV coordinates per corner (flipped if needed)
+            const float tx[4] = {
                 flipX ? sx + sw : sx,
                 flipX ? sx + sw : sx,
                 flipX ? sx : sx + sw,
                 flipX ? sx : sx + sw
             };
 
-            float ty[4] = {
+            const float ty[4] = {
                 sy,
                 sy + sh,
                 sy + sh,
                 sy
             };
 
+            // Set color and normal
             rlColor4ub(sprite.color.r, sprite.color.g, sprite.color.b, sprite.color.a);
             rlNormal3f(0.0f, 0.0f, 1.0f);
 
-            // Enviar vértices + UVs
+            // Submit 4 vertices (1 quad) to the GPU
             for (int i = 0; i < 4; ++i) {
                 rlTexCoord2f(tx[i], ty[i]);
-                rlVertex2f(verts[i].x, verts[i].y);
+                rlVertex2f(verts_cache[i].x, verts_cache[i].y);
             }
         }
 
         rlEnd();
-        rlSetTexture(0);
+        rlSetTexture(0); // Unbind texture
     }
+
 } // namespace rpg

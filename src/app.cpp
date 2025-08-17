@@ -29,10 +29,10 @@ namespace rpg {
         texture_tool->packer(RESOURCE_PATH"/images/", RESOURCE_PATH"/atlas.png", RESOURCE_PATH"/atlas.json");
         delete texture_tool;
 #endif
-
+        SetConfigFlags(FLAG_WINDOW_RESIZABLE);
         SetTraceLogLevel(LOG_ERROR);
         InitWindow(800, 600, "raylib + entt - collision demo");
-        //SetTargetFPS(60);
+        SetTargetFPS(60);
 
         registry = std::make_unique<entt::registry>();
         scene = std::make_unique<MyScene>(registry.get());
