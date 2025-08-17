@@ -7,10 +7,11 @@
 rpg::MyScene::MyScene(entt::registry *registry): Scene(registry) {
 }
 
-constexpr int ENEMY_QUANTITY = 50;
-constexpr float MAP_WIDTH = 1500;
-constexpr float MAP_HEIGHT = 1500;
-constexpr float ENEMY_SIZE = 50.f;
+constexpr int ENEMY_QUANTITY = 100;
+constexpr float MAP_WIDTH = 2200;
+constexpr float MAP_HEIGHT = 2200;
+constexpr float ENEMY_SIZE = 45.f;
+
 
 void rpg::MyScene::init() {
     std::random_device rd;
@@ -21,7 +22,6 @@ void rpg::MyScene::init() {
     std::uniform_int_distribution distColor(100, 255);
 
     PlayerConfig player_config;
-    player_config.color_rect.color = RAYWHITE;
     player_config.transform.position = {100.f, 200.f};
     create_player(registry, player_config);
 
@@ -44,4 +44,7 @@ void rpg::MyScene::init() {
 
         create_enemy(registry, enemy_config);
     }
+
+
+
 }

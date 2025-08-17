@@ -1,6 +1,8 @@
-//
-// Created by jhone on 12/08/2025.
-//
+// app.h
+// Author: Jhone
+// Created: 12/08/2024
+// Purpose: Main application class for a 2D game using raylib and entt,
+// managing the game loop, scene, and ECS systems.
 
 #include "app.h"
 #include <iostream>
@@ -10,9 +12,10 @@
 #include "systems/move_system.h"
 #include "systems/overlap_correction_system.h"
 #include "systems/player_input_system.h"
-#include "systems/render_system.h"
+#include "systems/shape_render_system.h"
 
 #include "systems/camera_system.h"
+#include "systems/sprite_renderer_system.h"
 
 #if BUILD_ATLAS_MODE
 #include "utils/texture_packer.h"
@@ -23,7 +26,7 @@ namespace rpg {
     APP::APP() {
 #if BUILD_ATLAS_MODE
         const TexturePacker *texture_tool = new TexturePacker();
-        texture_tool->packer(RESOURCE_PATH"/imagens/", RESOURCE_PATH"/atlas.png", RESOURCE_PATH"/atlas.json");
+        texture_tool->packer(RESOURCE_PATH"/images/", RESOURCE_PATH"/atlas.png", RESOURCE_PATH"/atlas.json");
         delete texture_tool;
 #endif
 
@@ -33,8 +36,6 @@ namespace rpg {
 
         registry = std::make_unique<entt::registry>();
         scene = std::make_unique<MyScene>(registry.get());
-
-
 
         auto player_input_system = std::make_unique<PlayerInputSystem>(registry.get());
         systems.push_back(std::move(player_input_system));
@@ -52,9 +53,13 @@ namespace rpg {
         camera = camera_system->get_camera();
         systems.push_back(std::move(camera_system));
 
+         auto shape_render_system = std::make_unique<RenderSystem>(registry.get());
+         systems.push_back(std::move(shape_render_system));
 
-         auto render_system = std::make_unique<RenderSystem>(registry.get());
-         systems.push_back(std::move(render_system));
+        auto sprite_render_system = std::make_unique<SpriteRendererSystem>(registry.get());
+        systems.push_back(std::move(sprite_render_system));
+
+
     }
 
     APP::~APP() {
@@ -68,7 +73,7 @@ namespace rpg {
 
 
             BeginDrawing();
-            ClearBackground(BLACK);
+            ClearBackground(GRAY);
 
             BeginMode2D(*camera);
             for (const auto &system : systems) {

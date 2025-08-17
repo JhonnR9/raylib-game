@@ -7,7 +7,8 @@
 namespace rpg {
 
     struct PlayerConfig {
-        ColorRect color_rect{ Color(30, 200, 25, 255), 50.f, 50.f };
+        //ColorRect color_rect{ Color(30, 200, 25, 255), 50.f, 50.f };
+        Sprite sprite{"player.png", Vector2{10,10}, RAYWHITE };
         Transform transform{ {0.f, 0.f}, 0.f, {1.f, 1.f} };
         Input input{ {0.f, 0.f} };
         BoxCollider2D collider{ 50.f, 50.f, false, false, false };

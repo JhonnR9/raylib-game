@@ -50,7 +50,7 @@ add_executable(raylib_game
         src/utils/texture_packer.cpp
         src/app.cpp
         src/scenes/my_scene.cpp
-        src/systems/render_system.cpp
+        src/systems/shape_render_system.cpp
         src/systems/player_input_system.cpp
         src/systems/move_system.cpp
         src/systems/collision_detection_system.cpp
@@ -59,6 +59,8 @@ add_executable(raylib_game
         src/factories/entities_factory.cpp
         src/systems/camera_system.cpp
         src/systems/camera_system.h
+        src/systems/sprite_renderer_system.cpp
+        src/systems/sprite_renderer_system.h
 )
 
 target_include_directories(raylib_game

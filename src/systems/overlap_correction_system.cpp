@@ -9,11 +9,34 @@ namespace rpg {
 OverlapCorrectionSystem::OverlapCorrectionSystem(entt::registry* registry)
     : System(registry) {}
 
+
+    // Main execution of the system, performs up to MAX_ITERATIONS to resolve all overlaps
+    void OverlapCorrectionSystem::run(float delta_time) {
+    bool has_overlap = true;
+    int iteration = 0;
+
+    while (has_overlap && iteration < MAX_ITERATIONS) {
+        // 1. Collect pairs of entities in collision
+        auto overlapping_pairs = collect_overlapping_pairs();
+
+        // 2. Calculate corrections for all detected pairs
+        auto corrections = calculate_all_corrections(overlapping_pairs);
+
+        // 3. Apply accumulated corrections to the entity transforms
+        apply_corrections(corrections);
+
+        // 4. Check if overlaps still exist to decide whether to continue iterating
+        has_overlap = check_any_overlap();
+
+        iteration++;
+    }
+}
+
 // Collects unique pairs of entities that are currently colliding and are not triggers
 std::set<std::pair<entt::entity, entt::entity>> OverlapCorrectionSystem::collect_overlapping_pairs() const {
     std::set<std::pair<entt::entity, entt::entity>> unique_pairs;
 
-    auto view = registry->view<BoxCollider2D, Transform>();
+    const auto view = registry->view<BoxCollider2D, Transform>();
     for (auto [entity, collider, transform] : view.each()) {
         if (!collider.is_colliding || collider.is_trigger) continue;
 
@@ -29,7 +52,7 @@ std::set<std::pair<entt::entity, entt::entity>> OverlapCorrectionSystem::collect
 // Utility function to accumulate correction in a map, summing displacements
 void OverlapCorrectionSystem::accumulate_correction(
     std::unordered_map<entt::entity, CorrectionIntent>& corrections,
-    entt::entity entity,
+    const entt::entity entity,
     const Vector2& offset) {
 
     corrections[entity].offset.x += offset.x;
@@ -62,38 +85,38 @@ std::unordered_map<entt::entity, CorrectionIntent> OverlapCorrectionSystem::calc
         [&](const auto& pair) {
             std::unordered_map<entt::entity, CorrectionIntent> local;
 
-            auto entityA = pair.first;
-            auto entityB = pair.second;
+            auto entity_a = pair.first;
+            auto entity_b = pair.second;
 
-            if (!registry->valid(entityA) || !registry->valid(entityB))
+            if (!registry->valid(entity_a) || !registry->valid(entity_b))
                 return local;
 
-            auto& colliderA = registry->get<BoxCollider2D>(entityA);
-            auto& colliderB = registry->get<BoxCollider2D>(entityB);
-            auto& transformA = registry->get<Transform>(entityA);
-            auto& transformB = registry->get<Transform>(entityB);
+            auto& collider_a = registry->get<BoxCollider2D>(entity_a);
+            auto& collider_b = registry->get<BoxCollider2D>(entity_b);
+            auto& transform_a = registry->get<Transform>(entity_a);
+            auto& transform_b = registry->get<Transform>(entity_b);
 
-            const CollisionContext ctx{entityA, entityB, colliderA, colliderB, transformA, transformB};
+            const CollisionContext ctx{entity_a, entity_b, collider_a, collider_b, transform_a, transform_b};
             const auto overlap = calculate_overlap(ctx);
 
-            if (!overlap.has_penetration())
-                return local;
+            // Don't have any penetration
+            if (!(overlap.x > 0 && overlap.y > 0)) return local;
 
             Vector2 correction = compute_correction(overlap);
 
             // If any collider is static, apply the offset to the other one
-            if (colliderA.is_static || colliderB.is_static) {
-                if (colliderA.is_static && !colliderB.is_static) {
-                    accumulate_correction(local, entityB, {correction.x * 2.0f, correction.y * 2.0f});
-                } else if (!colliderA.is_static && colliderB.is_static) {
-                    accumulate_correction(local, entityA, {correction.x * 2.0f, correction.y * 2.0f});
+            if (collider_a.is_static || collider_b.is_static) {
+                if (collider_a.is_static && !collider_b.is_static) {
+                    accumulate_correction(local, entity_b, {correction.x * 2.0f, correction.y * 2.0f});
+                } else if (!collider_a.is_static && collider_b.is_static) {
+                    accumulate_correction(local, entity_a, {correction.x * 2.0f, correction.y * 2.0f});
                 } else {
-                    accumulate_correction(local, entityA, correction);
-                    accumulate_correction(local, entityB, {-correction.x, -correction.y});
+                    accumulate_correction(local, entity_a, correction);
+                    accumulate_correction(local, entity_b, {-correction.x, -correction.y});
                 }
             } else {
-                accumulate_correction(local, entityA, correction);
-                accumulate_correction(local, entityB, {-correction.x, -correction.y});
+                accumulate_correction(local, entity_a, correction);
+                accumulate_correction(local, entity_b, {-correction.x, -correction.y});
             }
 
             return local;
@@ -120,7 +143,7 @@ void OverlapCorrectionSystem::apply_corrections(
 
 // Checks if there is still any overlap after applying corrections
 bool OverlapCorrectionSystem::check_any_overlap() const {
-    auto view = registry->view<BoxCollider2D, Transform>();
+    const auto view = registry->view<BoxCollider2D, Transform>();
 
     for (auto [entity, collider, transform] : view.each()) {
         if (!collider.is_colliding || collider.is_trigger) continue;
@@ -128,17 +151,15 @@ bool OverlapCorrectionSystem::check_any_overlap() const {
         for (const auto other : collider.colliding_entities) {
             if (!registry->valid(entity) || !registry->valid(other)) continue;
 
-            auto& colliderA = registry->get<BoxCollider2D>(entity);
-            auto& colliderB = registry->get<BoxCollider2D>(other);
-            auto& transformA = registry->get<Transform>(entity);
-            auto& transformB = registry->get<Transform>(other);
+            auto& collider_a = registry->get<BoxCollider2D>(entity);
+            auto& collider_b = registry->get<BoxCollider2D>(other);
+            auto& transform_a = registry->get<Transform>(entity);
+            auto& transform_b = registry->get<Transform>(other);
 
-            const CollisionContext ctx{entity, other, colliderA, colliderB, transformA, transformB};
+            const CollisionContext ctx{entity, other, collider_a, collider_b, transform_a, transform_b};
             const auto overlap = calculate_overlap(ctx);
 
-            if (overlap.has_penetration()) {
-                return true;
-            }
+            if (overlap.x > 0 && overlap.y > 0) return true;
         }
     }
     return false;
@@ -146,18 +167,18 @@ bool OverlapCorrectionSystem::check_any_overlap() const {
 
 // Calculates the delta vector and overlap values between two colliders
 OverlapResult OverlapCorrectionSystem::calculate_overlap(const CollisionContext& ctx) {
-    float half_a_w = ctx.collider_a.width * 0.5f;
-    float half_a_h = ctx.collider_a.height * 0.5f;
-    float half_b_w = ctx.collider_b.width * 0.5f;
-    float half_b_h = ctx.collider_b.height * 0.5f;
+    const float half_a_w = ctx.collider_a.width * 0.5f;
+    const float half_a_h = ctx.collider_a.height * 0.5f;
+    const float half_b_w = ctx.collider_b.width * 0.5f;
+    const float half_b_h = ctx.collider_b.height * 0.5f;
 
-    Vector2 delta = {
+    const Vector2 delta = {
         ctx.transform_a.position.x - ctx.transform_b.position.x,
         ctx.transform_a.position.y - ctx.transform_b.position.y
     };
 
-    float overlap_x = (half_a_w + half_b_w) - std::abs(delta.x);
-    float overlap_y = (half_a_h + half_b_h) - std::abs(delta.y);
+    const float overlap_x = (half_a_w + half_b_w) - std::abs(delta.x);
+    const float overlap_y = (half_a_h + half_b_h) - std::abs(delta.y);
 
     return {delta, overlap_x, overlap_y};
 }
@@ -169,34 +190,14 @@ Vector2 OverlapCorrectionSystem::compute_correction(const OverlapResult& overlap
     }
 
     if (overlap.x < overlap.y) {
-        float sign_x = (overlap.delta.x > 0) ? 1.0f : -1.0f;
+        const float sign_x = (overlap.delta.x > 0) ? 1.0f : -1.0f;
         return {overlap.x * sign_x * 0.5f, 0.0f};
     } else {
-        float sign_y = (overlap.delta.y > 0) ? 1.0f : -1.0f;
+        const float sign_y = (overlap.delta.y > 0) ? 1.0f : -1.0f;
         return {0.0f, overlap.y * sign_y * 0.5f};
     }
 }
 
-// Main execution of the system, performs up to MAX_ITERATIONS to resolve all overlaps
-void OverlapCorrectionSystem::run(float dt) {
-    bool has_overlap = true;
-    int iteration = 0;
 
-    while (has_overlap && iteration < MAX_ITERATIONS) {
-        // 1. Collect pairs of entities in collision
-        auto overlapping_pairs = collect_overlapping_pairs();
-
-        // 2. Calculate corrections for all detected pairs
-        auto corrections = calculate_all_corrections(overlapping_pairs);
-
-        // 3. Apply accumulated corrections to the entity transforms
-        apply_corrections(corrections);
-
-        // 4. Check if overlaps still exist to decide whether to continue iterating
-        has_overlap = check_any_overlap();
-
-        iteration++;
-    }
-}
 
 } // namespace rpg

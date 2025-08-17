@@ -1,20 +1,26 @@
 {
+    "cc.jpg": {
+        "height": 876,
+        "width": 620,
+        "x": 1,
+        "y": 1
+    },
     "enemy.png": {
         "height": 64,
         "width": 64,
-        "x": 1,
+        "x": 623,
         "y": 1
     },
     "player.png": {
         "height": 32,
         "width": 32,
-        "x": 101,
+        "x": 723,
         "y": 1
     },
     "sprite.png": {
         "height": 32,
         "width": 32,
-        "x": 67,
+        "x": 689,
         "y": 1
     }
 }

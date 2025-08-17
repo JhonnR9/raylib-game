@@ -7,6 +7,7 @@
 #include <raylib.h>
 #include <unordered_set>
 #include <entt/entity/entity.hpp> // Necessário para entt::entity
+#include <utility>
 
 namespace rpg {
 
@@ -24,17 +25,18 @@ namespace rpg {
         Vector2 move_direction;
 
         Input() = default;
-        explicit Input(Vector2 dir) : move_direction(dir) {}
+        explicit Input(const Vector2 dir) : move_direction(dir) {}
     };
 
     struct Sprite {
-        Texture2D* texture;
-        Vector2 uv;
-        Vector2 size;
-
+        std::string name;
+        mutable Vector2 size{};
+        Color color{};
         Sprite() = default;
-        Sprite(Texture2D* tex, Vector2 uv_coords, Vector2 sz)
-            : texture(tex), uv(uv_coords), size(sz) {}
+
+        explicit Sprite(std::string p, const Vector2 s, const Color c) : name(std::move(p)) , size(s) , color(c) {
+
+        }
     };
 
     struct Transform {

@@ -9,7 +9,7 @@
 void rpg::create_player(entt::registry *registry, const PlayerConfig& config) {
     const auto player = registry->create();
 
-    registry->emplace<ColorRect>(player,config.color_rect);
+    registry->emplace<Sprite>(player,config.sprite);
     registry->emplace<Transform>(player, config.transform);
     registry->emplace<Input>(player, config.input);
     registry->emplace<BoxCollider2D>(player, config.collider);

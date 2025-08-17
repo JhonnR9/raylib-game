@@ -1,3 +1,10 @@
+
+// CollisionDetectionSystem.h
+// Author: Jhone
+// Created: 16/08/2024
+// Purpose: Detects 2D collisions between entities with BoxCollider2D
+// and Transform components using a spatial hash grid for efficiency.
+
 #include "collision_detection_system.h"
 
 #include <iostream>
