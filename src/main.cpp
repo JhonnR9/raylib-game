@@ -1,11 +1,7 @@
-
-#include "app.h"
+#include "engine/app.h"
 
 int main() {
-    const auto* app = new rpg::APP();
-
-    app->run();
-    delete app;
-
+    const rpg::APP app;
+    app.run();
     return 0;
 }
